@@ -34,7 +34,7 @@ typedef struct FileHandle {
 /// Context of mapped file.
 typedef struct MapFileCtx {
     /// File content.
-    void* ptr;
+    void *ptr;
 
     /// File size rounded up to page size.
     size_t len;
@@ -58,7 +58,7 @@ typedef struct Lines {
 
 /// Slice of an instance of `Lines`.
 typedef struct LinesSlice {
-    /// Assosiated instance of `Lines`.
+    /// Associated instance of `Lines`.
     const Lines *const lines;
 
     /// Index of first line.
@@ -283,7 +283,7 @@ new_lines(char *content, size_t content_size) {
             // We need to duplicate not zero-terminated last line and
             // allocate one more byte to put zero. That is, in the instance's
             // destructor we have to free the manually-allocated last line,
-            // so we set the appropriate flag `Lines.free_last_line`.
+            // so we set the appropriate flag `Lines::free_last_line`.
             char *last_line = calloc(cur_len + 1, sizeof(*last_line));
             memcpy(last_line, &content[offset], cur_len);
             lines[nlines++] = last_line;
