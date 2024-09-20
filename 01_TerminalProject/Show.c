@@ -73,11 +73,11 @@ typedef struct LinesSlice {
 void
 fatal(const char *fmt, ...);
 
-/// Open regular file in read and write mode.
+/// Open regular file in read mode.
 /// Return handle to opened file if it is regular.
 /// # Errors
-/// - Panics if file does not exist or file is not regular.
-/// - Panics if `fstat` fails to get its attributes.
+/// - Panics if file does not exist or file is not regular or read permissions are not granted.
+/// - Panics if `stat` fails to get its attributes.
 FileHandle
 open_regular_file(const char *path);
 
@@ -160,21 +160,22 @@ open_regular_file(const char *path) {
     struct stat stb;    /* stat buffer */
     int fd;             /* file descriptor */
 
-    // Open file in read and write mode.
-    fd = open(path, O_RDWR);
-    if (fd < 0) {
+    // Get attributes.
+    if (stat(path, &stb) < 0) {
         perror(path);
         exit(EXIT_FAILURE);
-    }
-
-    // Get attributes.
-    if (fstat(fd, &stb) < 0) {
-        fatal("[%s]: fstat failed to get attributes", path);
     }
 
     // Check whether file is regular.
     if (!S_ISREG(stb.st_mode)) {
         fatal("[%s]: file is not regular", path);
+    }
+
+    // Open file in read mode.
+    fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        perror(path);
+        exit(EXIT_FAILURE);
     }
 
     return (FileHandle) {
@@ -195,19 +196,12 @@ map_file(const FileHandle *handle) {
         return (MapFileCtx) { 0 };
     }
 
-    // Check whether file is opened in read and write mode.
-    if ((fcntl(handle->fd, F_GETFL) & O_RDWR) != O_RDWR) {
-        return (MapFileCtx) { 0 };
-    }
-
     // Round len up to page size.
     pgs = sysconf(_SC_PAGESIZE);
     len = ((handle->size - 1) / pgs + 1) * pgs;
 
     // SAFETY:
-    // 1. We have already checked that file opened in read and write mode, so
-    // `PROT_READ|PROT_WRITE` is correct;
-    // 2. Mapping is private, so file content remains unchanged. 
+    // Mapping is private, so file content remains unchanged. 
     p = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE, handle->fd, 0);
     if (p == MAP_FAILED) {
         perror("mmap");
@@ -285,6 +279,11 @@ new_lines(char *content, size_t content_size) {
             // destructor we have to free the manually-allocated last line,
             // so we set the appropriate flag `Lines::free_last_line`.
             char *last_line = calloc(cur_len + 1, sizeof(*last_line));
+            if (last_line == NULL) {
+                perror("calloc");
+                exit(EXIT_FAILURE);
+            }
+
             memcpy(last_line, &content[offset], cur_len);
             lines[nlines++] = last_line;
 
