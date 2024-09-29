@@ -75,8 +75,8 @@ run_program(
             if (fd == -1) {
                 _exit(EXIT_FAILURE);
             }
-            dup2(fd, argv[1] ? STDOUT_FILENO : STDERR_FILENO);
-            close(fd);
+            dup2(fd, STDOUT_FILENO);
+            dup2(fd, STDERR_FILENO);
         }
         execv(program_name, argv);
         _exit(EXIT_FAILURE);
