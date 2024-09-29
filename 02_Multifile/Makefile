@@ -23,7 +23,7 @@ liboutput.so:	fun.o const.o
 
 fun.o prog.o:	outlib.h
 
-test:	prog prog-a prog-so testrunner
+test:	all testrunner
 	@LD_LIBRARY_PATH=$(PWD) ./testrunner
 	@LD_LIBRARY_PATH=$(PWD) ./testrunner arg
 	@LD_LIBRARY_PATH=$(PWD) ./testrunner abra cad abra
