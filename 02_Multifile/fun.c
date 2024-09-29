@@ -2,12 +2,12 @@
 #include "outlib.h"
 
 void
-output(char *str) {
+output(const char *str) {
     printf("%d: %s\012", COUNT++, str);
 }
 
 void
-usage(char *prog) {
+usage(const char *prog) {
     fprintf(
         stderr,
         "%s v%.2f: Print all arguments\012\t"\

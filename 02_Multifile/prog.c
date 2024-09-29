@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "outlib.h"
 
+static const char *NAME = "prog";
+
 int
 main(int argc, char **argv) {
     COUNT = argc;
@@ -14,6 +16,6 @@ main(int argc, char **argv) {
 
         output("<DONE>");
     } else {
-        usage(argv[0]);
+        usage(NAME);
     }
 }

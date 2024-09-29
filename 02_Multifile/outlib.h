@@ -3,7 +3,7 @@
 extern int COUNT;
 
 void
-output(char *);
+output(const char *);
 
 void
-usage(char *);
+usage(const char *);
