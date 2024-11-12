@@ -6,6 +6,7 @@
 #include <ctype.h>
 
 #include "rhash.h"
+#include "config.h"
 
 #ifdef _READLINE
 #include <readline/readline.h>
@@ -13,7 +14,7 @@
 
 int
 hash_alg(const char *str, enum rhash_ids *id) {
-    for (unsigned hash_id = RHASH_CRC32; hash_id != RHASH_BLAKE2B << 1; hash_id <<= 1) {
+    for (enum rhash_ids hash_id = RHASH_CRC32; hash_id != RHASH_BLAKE2B << 1; hash_id <<= 1) {
         if (!strcasecmp(str, rhash_get_name(hash_id))) {
             *id = hash_id;
             return 0;
