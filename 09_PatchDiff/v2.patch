@@ -1,0 +1,68 @@
+--- maze.c	2024-11-18 11:16:52.951403227 +0300
++++ ./.versions/maze_v2.c	2024-11-18 11:19:29.907132892 +0300
+@@ -1,11 +1,15 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdlib.h>
++#include <errno.h>
++
++#define USAGE "USAGE: ./maze_v2 <MAZE_SIZE>\n"
+ 
+ enum MazeConfig {
+-    LEN = 6,
++    NPARAMS = 1,
+     MAX_LEN = 64,
+     MAX_SIZE = MAX_LEN * 2 + 1,
++    LEN_ARG = 1,
+     WALL = '#',
+     WAY = '.',
+     SEED = 37,
+@@ -133,6 +137,21 @@
+     maze_fill_at(this, (Pos) { 1, 1 });
+ }
+ 
++static int
++parse_int(const char *str, int *res, int base) {
++    char *end_ptr = NULL;
++    errno = 0;
++
++    long long value = strtoll(str, &end_ptr, base);
++    if (errno || *end_ptr || end_ptr == str || (int) value != value) {
++        return -1;
++    }
++
++    *res = value;
++    return 0;
++}
++
++
+ int
+ main(int argc, char **argv) {
+     int len = 0, size = 0;
+@@ -140,10 +159,23 @@
+     char wall = 0, way = 0;
+     Maze maze;
+ 
+-    (void) argc;
+-    (void) argv;
++    if (argc <= NPARAMS) {
++        fprintf(stderr, "Too low arguments. Expected: %d, got: %d\n"USAGE, NPARAMS, argc);
++        exit(EXIT_FAILURE);
++    }
++
++    if (parse_int(argv[LEN_ARG], &len, BASE) < 0
++        || len < 1 
++        || len >= MAX_LEN
++    ) {
++        fprintf(
++            stderr,
++            "Error parsing length: expected a number within [1, %d], got: %s\n"
++            USAGE,
++            MAX_LEN, argv[LEN_ARG]
++        );
++    }
+ 
+-    len = LEN;
+     size = len * 2 + 1;
+     way = WAY;
+     wall = WALL;

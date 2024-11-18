@@ -1,0 +1,95 @@
+--- maze.c	2024-11-18 11:16:52.951403227 +0300
++++ ./.versions/maze_v4.c	2024-11-18 11:19:57.891489873 +0300
+@@ -1,14 +1,18 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdlib.h>
++#include <errno.h>
++
++#define USAGE "USAGE: ./maze_v4 <SEED> <WAYWALL> <MAZE_SIZE>\n"
+ 
+ enum MazeConfig {
+-    LEN = 6,
++    NPARAMS = 3,
+     MAX_LEN = 64,
+     MAX_SIZE = MAX_LEN * 2 + 1,
+-    WALL = '#',
+-    WAY = '.',
+-    SEED = 37,
++    LEN_ARG = 3,
++    WALL_ARG = 2,
++    WAY_ARG = 2,
++    SEED_ARG = 1,
+     BASE = 10,
+ };
+ 
+@@ -133,6 +137,21 @@
+     maze_fill_at(this, (Pos) { 1, 1 });
+ }
+ 
++static int
++parse_int(const char *str, int *res, int base) {
++    char *end_ptr = NULL;
++    errno = 0;
++
++    long long value = strtoll(str, &end_ptr, base);
++    if (errno || *end_ptr || end_ptr == str || (int) value != value) {
++        return -1;
++    }
++
++    *res = value;
++    return 0;
++}
++
++
+ int
+ main(int argc, char **argv) {
+     int len = 0, size = 0;
+@@ -140,14 +159,41 @@
+     char wall = 0, way = 0;
+     Maze maze;
+ 
+-    (void) argc;
+-    (void) argv;
++    if (argc <= NPARAMS) {
++        fprintf(stderr, "Too low arguments. Expected: %d, got: %d\n"USAGE, NPARAMS, argc);
++        exit(EXIT_FAILURE);
++    }
++
++    if (
++        parse_int(argv[LEN_ARG], &len, BASE) < 0
++        || len < 1 
++        || len >= MAX_LEN
++    ) {
++        fprintf(
++            stderr,
++            "Error parsing length: expected a number within [1, %d], got: %s\n"
++            USAGE,
++            MAX_LEN, argv[LEN_ARG]
++        );
++        exit(EXIT_FAILURE);
++    }
+ 
+-    len = LEN;
+     size = len * 2 + 1;
+-    way = WAY;
+-    wall = WALL;
+-    seed = SEED;
++    way = argv[WAY_ARG][0];
++    wall = argv[WALL_ARG][1];
++
++    if (
++        parse_int(argv[SEED_ARG], &seed, BASE) < 0
++        || seed < 0
++    ) {
++        fprintf(
++            stderr,
++            "Error parsing seed: expected non-negative integer number, got: %s\n"
++            USAGE,
++            argv[SEED_ARG]
++        );
++        exit(EXIT_FAILURE);
++    }
+ 
+     maze_new(size, seed, wall, way, &maze);
+     maze_fill(&maze);
