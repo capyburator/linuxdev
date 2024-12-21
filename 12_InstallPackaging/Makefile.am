@@ -18,9 +18,9 @@ ru.po: guess-number.c
 guess-number.c: roman.h
 
 @DX_RULES@
-doxygen-doc/man/man1/guess-number.1:	doxygen-doc
+doxygen-doc/man/man1/guess-number.c.1:	doxygen-doc
 
-man1_MANS = doxygen-doc/man/man1/guess-number.1
+man1_MANS = doxygen-doc/man/man1/guess-number.c.1
 
 install-data-local:
 	mkdir -p $(DESTDIR)/$(docdir)
